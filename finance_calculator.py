@@ -3,6 +3,10 @@ from tkinter import messagebox
 
 
 class FinanceCalculator:
+    def reset(self):
+        """Сбрасывает баланс и очищает историю операций."""
+        self.balance = 0.0
+        self.transactions.clear()
     def __init__(self):
         self.balance = 0.0
         self.transactions = []
@@ -42,10 +46,17 @@ class FinanceCalculatorApp:
         self.description_entry = tk.Entry(root)
         self.description_entry.pack()
 
+        tk.Button(root, text="Сброс", command=self.reset_calculator).pack(fill="x")
         tk.Button(root, text="Добавить доход", command=self.add_income).pack(fill="x")
         tk.Button(root, text="Добавить расход", command=self.add_expense).pack(fill="x")
         tk.Button(root, text="Баланс", command=self.show_balance).pack(fill="x")
         tk.Button(root, text="История операций", command=self.show_transactions).pack(fill="x")
+
+    def reset_calculator(self):
+        self.calculator.reset()
+        self.amount_entry.delete(0, tk.END)       # Очищаем поле ввода числа
+        self.description_entry.delete(0, tk.END)  # Очищаем поле описания
+        messagebox.showinfo("Сброс", "Данные успешно сброшены!")
 
     def add_income(self):
         try:
