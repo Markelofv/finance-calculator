@@ -1,0 +1,40 @@
+stages:
+  - test
+  - deploy
+
+variables:
+  DEPLOY_DIR: "/var/www/finance_calculator"
+
+# ---------- Тесты ----------
+test:
+  stage: test
+  image: python:3.10
+  before_script:
+    - python -m venv venv
+    - source venv/bin/activate
+    - pip install -r requirements.txt
+  script:
+    - pytest test_finance_calculator.py -v
+  only:
+    - main
+
+# ---------- Деплой на продуктовый контур ----------
+deploy:
+  stage: deploy
+  tags:
+    - deploy
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq openssh-client rsync
+    - eval $(ssh-agent -s)
+    - chmod 400 "$SSH_PRIVATE_KEY"
+    - ssh-add "$SSH_PRIVATE_KEY"
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+  script:
+    - rsync -az --delete --exclude='.git' --exclude='venv' ./ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
+    - ssh "$DEPLOY_USER@$DEPLOY_HOST" "cd $DEPLOY_PATH && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt --quiet"
+    - echo "Deployed to $DEPLOY_HOST:$DEPLOY_PATH"
+  only:
+    - main
+  environment:
+    name: production
