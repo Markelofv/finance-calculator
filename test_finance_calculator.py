@@ -13,7 +13,7 @@ def test_initial_balance(calculator):
 
 def test_add_income(calculator):
     calculator.add_income(1000, "Salary")
-    assert calculator.get_balance() == 19000
+    assert calculator.get_balance() == 1000
     assert calculator.get_transactions() == [("Salary", 1000)]
 
 
