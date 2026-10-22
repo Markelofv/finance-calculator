@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  # === Стадия тестов (в облаке GitHub) ===
+  # === Стадия тестов ===
   test:
     runs-on: ubuntu-latest
     steps:
@@ -25,10 +25,10 @@ jobs:
       - name: Run tests
         run: pytest test_finance_calculator.py -v
 
-  # === Стадия деплоя (на вашей VM) ===
+  # === Стадия деплоя ===
   deploy:
     needs: test
-    runs-on: self-hosted  # Запуск на вашей виртуальной машине
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
