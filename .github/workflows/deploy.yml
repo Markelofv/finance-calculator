@@ -1,0 +1,44 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  # === Стадия тестов ===
+  test:
+    runs-on: ubuntu-latest  # Используем облачный раннер GitHub для тестов
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest test_finance_calculator.py -v
+
+  # === Стадия деплоя (только если тесты прошли) ===
+  deploy:
+    needs: test  # Запустится только после успешного test
+    runs-on: self-hosted  # Запускается на вашей VM (раннере)
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VM via rsync
+        uses: burnett01/rsync-deployments@v9
+        with:
+          switches: -avzr --delete --exclude='.git' --exclude='venv'
+          path: ./
+          remote_path: ${{ secrets.REMOTE_TARGET }}
+          remote_host: ${{ secrets.REMOTE_HOST }}
+          remote_user: ${{ secrets.REMOTE_USER }}
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
