@@ -39,3 +39,15 @@ def test_invalid_expense_amount(calculator):
     with pytest.raises(ValueError, match="Expense must be greater than zero."):
         calculator.add_expense(-50)
 
+def test_reset_calculator(calculator):
+
+    calculator.add_income(1000, "Salary")
+    calculator.add_expense(200, "Food")
+    assert calculator.get_balance() == 800
+    assert len(calculator.get_transactions()) == 2
+
+    calculator.reset()
+
+    assert calculator.get_balance() == 0
+    assert calculator.get_transactions() == []
+
